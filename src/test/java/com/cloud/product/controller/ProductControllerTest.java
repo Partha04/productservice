@@ -8,9 +8,14 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,10 +23,11 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static com.cloud.product.testData.ProductTestData.PRODUCT_REQUEST;
-import static com.cloud.product.testData.ProductTestData.PRODUCT_RESPONSE;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import java.util.List;
+
+import static com.cloud.product.testData.ProductTestData.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -102,6 +108,121 @@ class ProductControllerTest {
             resultActions.andExpect(jsonPath("tags[0]").value(PRODUCT_REQUEST.getTags().get(0)));
             resultActions.andExpect(jsonPath("tags[1]").value(PRODUCT_REQUEST.getTags().get(1)));
             resultActions.andExpect(jsonPath("customFields").value(PRODUCT_REQUEST.getCustomFields()));
+        }
+    }
+
+    @Nested
+    class getProducts {
+        @Test
+        void shouldGiveTheListOfProduct() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            ResultActions actions = mockMvc.perform(requestBuilder);
+            actions.andExpect(status().isOk());
+        }
+
+
+        @Test
+        void shouldInvokeTheProductService_getProductsMethod_with_Page_0_Size_10_Sort_id_and_Direction_ASC_ByDefault() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            requestBuilder.contentType(MediaType.APPLICATION_JSON);
+            when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(null);
+
+            mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+            ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            verify(productService, times(1)).getProduct(pageableCaptor.capture());
+            PageRequest pageable = (PageRequest) pageableCaptor.getValue();
+            assertEquals(0, pageable.getPageNumber());
+            assertEquals(10, pageable.getPageSize());
+            assertEquals("id: ASC", pageable.getSort().toString());
+        }
+
+        @Test
+        void shouldInvokeTheProductService_getProductsMethod_with_Page_1_Size_3_Sort_name_and_Direction_DESC() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            requestBuilder.param("page", "0");
+            requestBuilder.param("size", "3");
+            requestBuilder.param("sort", "name");
+            requestBuilder.param("direction", "DESC");
+            requestBuilder.contentType(MediaType.APPLICATION_JSON);
+            when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(null);
+
+            mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+            ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            verify(productService, times(1)).getProduct(pageableCaptor.capture());
+            PageRequest pageable = (PageRequest) pageableCaptor.getValue();
+            assertEquals(0, pageable.getPageNumber());
+            assertEquals(3, pageable.getPageSize());
+            assertEquals("name: DESC", pageable.getSort().toString());
+        }
+
+        @Test
+        void shouldInvokeTheProductService_getProductsMethod_with_Page_10_Size_1_Sort_size_and_Direction_ASC() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            requestBuilder.param("page", "10");
+            requestBuilder.param("size", "1");
+            requestBuilder.param("sort", "size");
+            requestBuilder.param("direction", "ASC");
+            requestBuilder.contentType(MediaType.APPLICATION_JSON);
+            when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(null);
+
+            mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+            ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            verify(productService, times(1)).getProduct(pageableCaptor.capture());
+            PageRequest pageable = (PageRequest) pageableCaptor.getValue();
+            assertEquals(10, pageable.getPageNumber());
+            assertEquals(1, pageable.getPageSize());
+            assertEquals("size: ASC", pageable.getSort().toString());
+        }
+
+        @Test
+        void shouldGiveAPageWithOneProduct() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            requestBuilder.contentType(MediaType.APPLICATION_JSON);
+            List<ProductResponse> productResponseList = List.of(PRODUCT_RESPONSE);
+            when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(new PageImpl<>(productResponseList));
+
+            ResultActions actions = mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+            actions.andExpect(status().isOk())
+                    .andExpect(jsonPath("content[0].productName").value(PRODUCT_RESPONSE.getProductName()))
+                    .andExpect(jsonPath("content[0].productId").value(PRODUCT_RESPONSE.getProductId()))
+                    .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
+                    .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
+                    .andExpect(jsonPath("content[0].tags[0]").value(PRODUCT_RESPONSE.getTags().get(0)))
+                    .andExpect(jsonPath("content[0].tags[1]").value(PRODUCT_RESPONSE.getTags().get(1)))
+                    .andExpect(jsonPath("content[0].customFields.key1").value(PRODUCT_RESPONSE.getCustomFields().get("key1")))
+            ;
+        }
+
+        @Test
+        void shouldGiveAPageWithTwoProduct() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            requestBuilder.contentType(MediaType.APPLICATION_JSON);
+            List<ProductResponse> productResponseList = List.of(PRODUCT_RESPONSE, PRODUCT_RESPONSE1);
+            when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(new PageImpl<>(productResponseList));
+
+            ResultActions actions = mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+            actions.andExpect(status().isOk())
+                    .andExpect(jsonPath("content[0].productName").value(PRODUCT_RESPONSE.getProductName()))
+                    .andExpect(jsonPath("content[0].productId").value(PRODUCT_RESPONSE.getProductId()))
+                    .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
+                    .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
+                    .andExpect(jsonPath("content[0].tags[0]").value(PRODUCT_RESPONSE.getTags().get(0)))
+                    .andExpect(jsonPath("content[0].tags[1]").value(PRODUCT_RESPONSE.getTags().get(1)))
+                    .andExpect(jsonPath("content[0].customFields.key1").value(PRODUCT_RESPONSE.getCustomFields().get("key1")))
+
+                    .andExpect(jsonPath("content[1].productName").value(PRODUCT_RESPONSE1.getProductName()))
+                    .andExpect(jsonPath("content[1].productId").value(PRODUCT_RESPONSE1.getProductId()))
+                    .andExpect(jsonPath("content[1].price").value(PRODUCT_RESPONSE1.getPrice()))
+                    .andExpect(jsonPath("content[1].price").value(PRODUCT_RESPONSE1.getPrice()))
+                    .andExpect(jsonPath("content[1].tags[0]").value(PRODUCT_RESPONSE1.getTags().get(0)))
+                    .andExpect(jsonPath("content[1].tags[1]").value(PRODUCT_RESPONSE1.getTags().get(1)))
+                    .andExpect(jsonPath("content[1].customFields.key2").value(PRODUCT_RESPONSE1.getCustomFields().get("key2")))
+            ;
         }
     }
 }

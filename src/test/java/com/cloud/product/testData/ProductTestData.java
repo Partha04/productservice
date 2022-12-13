@@ -2,10 +2,15 @@ package com.cloud.product.testData;
 
 import com.cloud.product.dto.ProductRequest;
 import com.cloud.product.dto.ProductResponse;
+import com.cloud.product.model.Product;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.HashMap;
 import java.util.List;
 
+@Configuration
 public class ProductTestData {
 
     public static ProductRequest PRODUCT_REQUEST = new ProductRequest();
@@ -13,6 +18,12 @@ public class ProductTestData {
 
     public static ProductRequest PRODUCT_REQUEST1 = new ProductRequest();
     public static ProductResponse PRODUCT_RESPONSE1 = new ProductResponse();
+    public static PageRequest FIRST_PAGE_WITH_SIZE_ONE = PageRequest.of(0, 1);
+    public static PageRequest FIRST_PAGE_WITH_SIZE_TWO = PageRequest.of(0, 2);
+    public static PageRequest SECOND_PAGE_WITH_SIZE_ONE = PageRequest.of(1, 1);
+    public static PageRequest SECOND_PAGE_WITH_SIZE_ONE_SORTED_BY_ = PageRequest.of(1, 1, Sort.by("name").ascending());
+    public static Product PRODUCT = new Product();
+    public static Product PRODUCT1 = new Product();
 
     static {
         String product_name = "product Name";
@@ -20,7 +31,13 @@ public class ProductTestData {
         List<String> tags = List.of("tag1", "tage2");
         HashMap<String, String> requestCustomFields = new HashMap<>();
         requestCustomFields.put("key1", "value1");
-        double price = 50.9;
+        double price = 150.9;
+
+        PRODUCT.setProductId(product_id);
+        PRODUCT.setProductName(product_name);
+        PRODUCT.setTags(tags);
+        PRODUCT.setPrice(price);
+        PRODUCT.setCustomFields(requestCustomFields);
 
         PRODUCT_REQUEST.setProductName(product_name);
         PRODUCT_REQUEST.setProductId(product_id);
@@ -39,9 +56,15 @@ public class ProductTestData {
         String product_id1 = "product id 1";
         List<String> tags1 = List.of("tag3", "tage4");
         HashMap<String, String> requestCustomFields1 = new HashMap<>();
-        requestCustomFields.put("key2", "value2");
-        double price1 = 150.1;
+        requestCustomFields1.put("key2", "value2");
+        double price1 = 140.1;
 
+
+        PRODUCT1.setProductId(product_id1);
+        PRODUCT1.setProductName(product_name1);
+        PRODUCT1.setTags(tags1);
+        PRODUCT1.setPrice(price1);
+        PRODUCT1.setCustomFields(requestCustomFields1);
 
         PRODUCT_REQUEST1.setProductName(product_name1);
         PRODUCT_REQUEST1.setProductId(product_id1);
