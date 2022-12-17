@@ -26,4 +26,8 @@ public class ProductService {
         Page<Product> productPage = productRepository.findAll(pageable);
         return productPage.map(product -> mapper.map(product, ProductResponse.class));
     }
+
+    public ProductResponse updateProduct(String id, ProductRequest productRequest) {
+        return null;
+    }
 }

@@ -28,8 +28,7 @@ import java.util.List;
 import static com.cloud.product.testData.ProductTestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = ProductController.class)
@@ -102,13 +101,16 @@ class ProductControllerTest {
         void shouldGiveTheSavedProductWhenProductIsSavedSuccessFully() throws Exception {
             when(productService.saveNewProduct(PRODUCT_REQUEST)).thenReturn(PRODUCT_RESPONSE);
             ResultActions resultActions = makeProductPostRequest(PRODUCT_REQUEST);
-            resultActions.andExpect(status().isCreated());
-            resultActions.andExpect(jsonPath("productCode").value(PRODUCT_REQUEST.getProductCode()));
-            resultActions.andExpect(jsonPath("productName").value(PRODUCT_REQUEST.getProductName()));
-            resultActions.andExpect(jsonPath("price").value(PRODUCT_REQUEST.getPrice()));
-            resultActions.andExpect(jsonPath("tags[0]").value(PRODUCT_REQUEST.getTags().get(0)));
-            resultActions.andExpect(jsonPath("tags[1]").value(PRODUCT_REQUEST.getTags().get(1)));
-            resultActions.andExpect(jsonPath("customFields").value(PRODUCT_REQUEST.getCustomFields()));
+            resultActions.andExpect(status().isCreated())
+                    .andExpect(content().string(objectMapper.writeValueAsString(PRODUCT_RESPONSE)));
+        }
+
+        @Test
+        void shouldGiveTheSavedProductWhenAnotherProductIsSavedSuccessFully() throws Exception {
+            when(productService.saveNewProduct(PRODUCT_REQUEST1)).thenReturn(PRODUCT_RESPONSE1);
+            ResultActions resultActions = makeProductPostRequest(PRODUCT_REQUEST1);
+            resultActions.andExpect(status().isCreated())
+                    .andExpect(content().string(objectMapper.writeValueAsString(PRODUCT_RESPONSE1)));
         }
     }
 
@@ -185,19 +187,13 @@ class ProductControllerTest {
             MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate);
             requestBuilder.contentType(MediaType.APPLICATION_JSON);
             List<ProductResponse> productResponseList = List.of(PRODUCT_RESPONSE);
-            when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(new PageImpl<>(productResponseList));
+            PageImpl<ProductResponse> productResponses = new PageImpl<>(productResponseList);
+            when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(productResponses);
 
             ResultActions actions = mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
             actions.andExpect(status().isOk())
-                    .andExpect(jsonPath("content[0].productName").value(PRODUCT_RESPONSE.getProductName()))
-                    .andExpect(jsonPath("content[0].productCode").value(PRODUCT_RESPONSE.getProductCode()))
-                    .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
-                    .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
-                    .andExpect(jsonPath("content[0].tags[0]").value(PRODUCT_RESPONSE.getTags().get(0)))
-                    .andExpect(jsonPath("content[0].tags[1]").value(PRODUCT_RESPONSE.getTags().get(1)))
-                    .andExpect(jsonPath("content[0].customFields.key1").value(PRODUCT_RESPONSE.getCustomFields().get("key1")))
-            ;
+                    .andExpect(content().string(objectMapper.writeValueAsString(productResponses)));
         }
 
         @Test
@@ -205,27 +201,64 @@ class ProductControllerTest {
             MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate);
             requestBuilder.contentType(MediaType.APPLICATION_JSON);
             List<ProductResponse> productResponseList = List.of(PRODUCT_RESPONSE, PRODUCT_RESPONSE1);
-            when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(new PageImpl<>(productResponseList));
+            PageImpl<ProductResponse> productResponses = new PageImpl<>(productResponseList);
+            when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(productResponses);
 
             ResultActions actions = mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
             actions.andExpect(status().isOk())
-                    .andExpect(jsonPath("content[0].productName").value(PRODUCT_RESPONSE.getProductName()))
-                    .andExpect(jsonPath("content[0].productCode").value(PRODUCT_RESPONSE.getProductCode()))
-                    .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
-                    .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
-                    .andExpect(jsonPath("content[0].tags[0]").value(PRODUCT_RESPONSE.getTags().get(0)))
-                    .andExpect(jsonPath("content[0].tags[1]").value(PRODUCT_RESPONSE.getTags().get(1)))
-                    .andExpect(jsonPath("content[0].customFields.key1").value(PRODUCT_RESPONSE.getCustomFields().get("key1")))
-
-                    .andExpect(jsonPath("content[1].productName").value(PRODUCT_RESPONSE1.getProductName()))
-                    .andExpect(jsonPath("content[1].productCode").value(PRODUCT_RESPONSE1.getProductCode()))
-                    .andExpect(jsonPath("content[1].price").value(PRODUCT_RESPONSE1.getPrice()))
-                    .andExpect(jsonPath("content[1].price").value(PRODUCT_RESPONSE1.getPrice()))
-                    .andExpect(jsonPath("content[1].tags[0]").value(PRODUCT_RESPONSE1.getTags().get(0)))
-                    .andExpect(jsonPath("content[1].tags[1]").value(PRODUCT_RESPONSE1.getTags().get(1)))
-                    .andExpect(jsonPath("content[1].customFields.key2").value(PRODUCT_RESPONSE1.getCustomFields().get("key2")))
+                    .andExpect(content().string(objectMapper.writeValueAsString(productResponses)))
             ;
         }
+    }
+
+    @Nested
+    class UpdateProduct {
+        @Test
+        void shouldGiveStatusOkWhenProductWithGivenIDIsUpdated() throws Exception {
+            String productId = "639d77e2b481e31d80294ecc";
+            when(productService.updateProduct(anyString(), any(ProductRequest.class))).thenReturn(new ProductResponse());
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/update/{id}", productId);
+            requestBuilder.contentType(MediaType.APPLICATION_JSON);
+            requestBuilder.content(objectMapper.writeValueAsString(PRODUCT_REQUEST));
+            ResultActions resultActions = mockMvc.perform(requestBuilder);
+            resultActions.andExpect(status().isOk());
+        }
+
+        @Test
+        void shouldInvokeProductServiceUpdateProductMethodWithGivenParams() throws Exception {
+            String productId = "639d77e2b481e31d80294ecc";
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/update/{id}", productId);
+            requestBuilder.contentType(MediaType.APPLICATION_JSON);
+            requestBuilder.content(objectMapper.writeValueAsString(PRODUCT_REQUEST));
+            when(productService.updateProduct(anyString(), any(ProductRequest.class))).thenReturn(PRODUCT_RESPONSE);
+            ResultActions resultActions = mockMvc.perform(requestBuilder);
+
+            ArgumentCaptor<ProductRequest> productRequestArgumentCaptor = ArgumentCaptor.forClass(ProductRequest.class);
+            ArgumentCaptor<String> idArgumentCaptor = ArgumentCaptor.forClass(String.class);
+
+            resultActions.andExpect(status().isOk());
+            verify(productService).updateProduct(idArgumentCaptor.capture(), productRequestArgumentCaptor.capture());
+            assertEquals(productId, idArgumentCaptor.getValue());
+            assertEquals(PRODUCT_REQUEST, productRequestArgumentCaptor.getValue());
+        }
+
+        @Test
+        void shouldGiveUpdatedProductRequest() throws Exception {
+            String productId = "639d77e2b481e31d80294ecc";
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/update/{id}", productId);
+            requestBuilder.contentType(MediaType.APPLICATION_JSON);
+            requestBuilder.content(objectMapper.writeValueAsString(PRODUCT_REQUEST));
+            when(productService.updateProduct(anyString(), any(ProductRequest.class))).thenReturn(PRODUCT_RESPONSE);
+            ResultActions resultActions = mockMvc.perform(requestBuilder);
+
+            ArgumentCaptor<ProductRequest> productRequestArgumentCaptor = ArgumentCaptor.forClass(ProductRequest.class);
+            ArgumentCaptor<String> idArgumentCaptor = ArgumentCaptor.forClass(String.class);
+
+            resultActions.andExpect(status().isOk());
+            resultActions.andExpect(content().string(objectMapper.writeValueAsString(PRODUCT_RESPONSE)));
+        }
+
+
     }
 }
