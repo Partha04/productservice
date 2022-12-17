@@ -17,7 +17,7 @@ public class ProductRequest {
     @NotNull(message = "product price can not be empty")
     private Double price;
     private List<String> tags;
-    @NotNull(message = "product ID can not be empty")
-    private String productId;
+    @NotNull(message = "product code can not be empty")
+    private String productCode;
     private Map<String, String> customFields;
 }

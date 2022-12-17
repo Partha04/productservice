@@ -27,53 +27,53 @@ public class ProductTestData {
 
     static {
         String product_name = "product Name";
-        String product_id = "product id";
+        String product_code = "product code";
         List<String> tags = List.of("tag1", "tage2");
         HashMap<String, String> requestCustomFields = new HashMap<>();
         requestCustomFields.put("key1", "value1");
         double price = 150.9;
 
-        PRODUCT.setProductId(product_id);
+        PRODUCT.setProductCode(product_code);
         PRODUCT.setProductName(product_name);
         PRODUCT.setTags(tags);
         PRODUCT.setPrice(price);
         PRODUCT.setCustomFields(requestCustomFields);
 
         PRODUCT_REQUEST.setProductName(product_name);
-        PRODUCT_REQUEST.setProductId(product_id);
+        PRODUCT_REQUEST.setProductCode(product_code);
         PRODUCT_REQUEST.setTags(tags);
         PRODUCT_REQUEST.setCustomFields(requestCustomFields);
         PRODUCT_REQUEST.setPrice(price);
 
         PRODUCT_RESPONSE.setProductName(product_name);
-        PRODUCT_RESPONSE.setProductId(product_id);
+        PRODUCT_RESPONSE.setProductCode(product_code);
         PRODUCT_RESPONSE.setTags(tags);
         PRODUCT_RESPONSE.setCustomFields(requestCustomFields);
         PRODUCT_RESPONSE.setPrice(price);
 
 
         String product_name1 = "product Name 1";
-        String product_id1 = "product id 1";
+        String product_code1 = "product code 1";
         List<String> tags1 = List.of("tag3", "tage4");
         HashMap<String, String> requestCustomFields1 = new HashMap<>();
         requestCustomFields1.put("key2", "value2");
         double price1 = 140.1;
 
 
-        PRODUCT1.setProductId(product_id1);
+        PRODUCT1.setProductCode(product_code1);
         PRODUCT1.setProductName(product_name1);
         PRODUCT1.setTags(tags1);
         PRODUCT1.setPrice(price1);
         PRODUCT1.setCustomFields(requestCustomFields1);
 
         PRODUCT_REQUEST1.setProductName(product_name1);
-        PRODUCT_REQUEST1.setProductId(product_id1);
+        PRODUCT_REQUEST1.setProductCode(product_code1);
         PRODUCT_REQUEST1.setTags(tags1);
         PRODUCT_REQUEST1.setCustomFields(requestCustomFields1);
         PRODUCT_REQUEST1.setPrice(price1);
 
         PRODUCT_RESPONSE1.setProductName(product_name1);
-        PRODUCT_RESPONSE1.setProductId(product_id1);
+        PRODUCT_RESPONSE1.setProductCode(product_code1);
         PRODUCT_RESPONSE1.setTags(tags1);
         PRODUCT_RESPONSE1.setCustomFields(requestCustomFields1);
         PRODUCT_RESPONSE1.setPrice(price1);

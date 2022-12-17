@@ -17,7 +17,8 @@ public class ProductService {
     ModelMapper mapper = new ModelMapper();
 
     public ProductResponse saveNewProduct(ProductRequest productRequest) {
-        Product product = productRepository.save(mapper.map(productRequest, Product.class));
+        Product entity = mapper.map(productRequest, Product.class);
+        Product product = productRepository.save(entity);
         return mapper.map(product, ProductResponse.class);
     }
 

@@ -22,6 +22,6 @@ public class Product {
     private String productName;
     private Double price;
     private List<String> tags;
-    private String productId;
+    private String productCode;
     private Map<String, String> customFields;
 }

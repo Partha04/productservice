@@ -44,10 +44,11 @@ class ProductControllerTest {
 
     @Nested
     class SaveProduct {
+        String urlTemplate = "/new";
 
         @NotNull
         private ResultActions makeProductPostRequest(ProductRequest productRequest) throws Exception {
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/product");
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(urlTemplate);
             String content = objectMapper.writeValueAsString(productRequest);
             requestBuilder.content(content);
             requestBuilder.contentType(MediaType.APPLICATION_JSON);
@@ -70,7 +71,7 @@ class ProductControllerTest {
         @Test
         void saveNewProductMustContainProductName() throws Exception {
             ProductRequest productRequest = new ProductRequest();
-            productRequest.setProductId("12");
+            productRequest.setProductCode("12");
             productRequest.setPrice(12.1);
             ResultActions resultActions = makeProductPostRequest(productRequest);
             resultActions.andExpect(status().isBadRequest())
@@ -81,20 +82,20 @@ class ProductControllerTest {
         void saveNewProductMustContainProductProductPrice() throws Exception {
             ProductRequest productRequest = new ProductRequest();
             productRequest.setProductName("product name");
-            productRequest.setProductId("12");
+            productRequest.setProductCode("12");
             ResultActions resultActions = makeProductPostRequest(productRequest);
             resultActions.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("message").value("product price can not be empty"));
         }
 
         @Test
-        void saveNewProductMustContainProductProductID() throws Exception {
+        void saveNewProductMustContainProductproductCode() throws Exception {
             ProductRequest productRequest = new ProductRequest();
             productRequest.setProductName("product name");
             productRequest.setPrice(12.1);
             ResultActions resultActions = makeProductPostRequest(productRequest);
             resultActions.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("message").value("product ID can not be empty"));
+                    .andExpect(jsonPath("message").value("product code can not be empty"));
         }
 
         @Test
@@ -102,7 +103,7 @@ class ProductControllerTest {
             when(productService.saveNewProduct(PRODUCT_REQUEST)).thenReturn(PRODUCT_RESPONSE);
             ResultActions resultActions = makeProductPostRequest(PRODUCT_REQUEST);
             resultActions.andExpect(status().isCreated());
-            resultActions.andExpect(jsonPath("productId").value(PRODUCT_REQUEST.getProductId()));
+            resultActions.andExpect(jsonPath("productCode").value(PRODUCT_REQUEST.getProductCode()));
             resultActions.andExpect(jsonPath("productName").value(PRODUCT_REQUEST.getProductName()));
             resultActions.andExpect(jsonPath("price").value(PRODUCT_REQUEST.getPrice()));
             resultActions.andExpect(jsonPath("tags[0]").value(PRODUCT_REQUEST.getTags().get(0)));
@@ -113,9 +114,11 @@ class ProductControllerTest {
 
     @Nested
     class getProducts {
+        String urlTemplate = "/all";
+
         @Test
         void shouldGiveTheListOfProduct() throws Exception {
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate);
             ResultActions actions = mockMvc.perform(requestBuilder);
             actions.andExpect(status().isOk());
         }
@@ -123,7 +126,7 @@ class ProductControllerTest {
 
         @Test
         void shouldInvokeTheProductService_getProductsMethod_with_Page_0_Size_10_Sort_id_and_Direction_ASC_ByDefault() throws Exception {
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate);
             requestBuilder.contentType(MediaType.APPLICATION_JSON);
             when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(null);
 
@@ -139,7 +142,7 @@ class ProductControllerTest {
 
         @Test
         void shouldInvokeTheProductService_getProductsMethod_with_Page_1_Size_3_Sort_name_and_Direction_DESC() throws Exception {
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate);
             requestBuilder.param("page", "0");
             requestBuilder.param("size", "3");
             requestBuilder.param("sort", "name");
@@ -159,7 +162,7 @@ class ProductControllerTest {
 
         @Test
         void shouldInvokeTheProductService_getProductsMethod_with_Page_10_Size_1_Sort_size_and_Direction_ASC() throws Exception {
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate);
             requestBuilder.param("page", "10");
             requestBuilder.param("size", "1");
             requestBuilder.param("sort", "size");
@@ -179,7 +182,7 @@ class ProductControllerTest {
 
         @Test
         void shouldGiveAPageWithOneProduct() throws Exception {
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate);
             requestBuilder.contentType(MediaType.APPLICATION_JSON);
             List<ProductResponse> productResponseList = List.of(PRODUCT_RESPONSE);
             when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(new PageImpl<>(productResponseList));
@@ -188,7 +191,7 @@ class ProductControllerTest {
 
             actions.andExpect(status().isOk())
                     .andExpect(jsonPath("content[0].productName").value(PRODUCT_RESPONSE.getProductName()))
-                    .andExpect(jsonPath("content[0].productId").value(PRODUCT_RESPONSE.getProductId()))
+                    .andExpect(jsonPath("content[0].productCode").value(PRODUCT_RESPONSE.getProductCode()))
                     .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
                     .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
                     .andExpect(jsonPath("content[0].tags[0]").value(PRODUCT_RESPONSE.getTags().get(0)))
@@ -199,7 +202,7 @@ class ProductControllerTest {
 
         @Test
         void shouldGiveAPageWithTwoProduct() throws Exception {
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/product");
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate);
             requestBuilder.contentType(MediaType.APPLICATION_JSON);
             List<ProductResponse> productResponseList = List.of(PRODUCT_RESPONSE, PRODUCT_RESPONSE1);
             when(productService.getProduct(Mockito.any(PageRequest.class))).thenReturn(new PageImpl<>(productResponseList));
@@ -208,7 +211,7 @@ class ProductControllerTest {
 
             actions.andExpect(status().isOk())
                     .andExpect(jsonPath("content[0].productName").value(PRODUCT_RESPONSE.getProductName()))
-                    .andExpect(jsonPath("content[0].productId").value(PRODUCT_RESPONSE.getProductId()))
+                    .andExpect(jsonPath("content[0].productCode").value(PRODUCT_RESPONSE.getProductCode()))
                     .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
                     .andExpect(jsonPath("content[0].price").value(PRODUCT_RESPONSE.getPrice()))
                     .andExpect(jsonPath("content[0].tags[0]").value(PRODUCT_RESPONSE.getTags().get(0)))
@@ -216,7 +219,7 @@ class ProductControllerTest {
                     .andExpect(jsonPath("content[0].customFields.key1").value(PRODUCT_RESPONSE.getCustomFields().get("key1")))
 
                     .andExpect(jsonPath("content[1].productName").value(PRODUCT_RESPONSE1.getProductName()))
-                    .andExpect(jsonPath("content[1].productId").value(PRODUCT_RESPONSE1.getProductId()))
+                    .andExpect(jsonPath("content[1].productCode").value(PRODUCT_RESPONSE1.getProductCode()))
                     .andExpect(jsonPath("content[1].price").value(PRODUCT_RESPONSE1.getPrice()))
                     .andExpect(jsonPath("content[1].price").value(PRODUCT_RESPONSE1.getPrice()))
                     .andExpect(jsonPath("content[1].tags[0]").value(PRODUCT_RESPONSE1.getTags().get(0)))

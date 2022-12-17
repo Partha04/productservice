@@ -21,12 +21,12 @@ public class ProductController {
     @Autowired
     ProductService productService;
 
-    @PostMapping(path = "/product")
+    @PostMapping(path = "/new")
     ResponseEntity<ProductResponse> saveNewProduct(@RequestBody @Valid ProductRequest productRequest) {
         return new ResponseEntity<>(productService.saveNewProduct(productRequest), HttpStatus.CREATED);
     }
 
-    @GetMapping("/product")
+    @GetMapping("/all")
     ResponseEntity<?> getProducts(@RequestParam(required = false, name = "page", defaultValue = "0") int page, @RequestParam(required = false, name = "size", defaultValue = "10") int size, @RequestParam(required = false, name = "sort", defaultValue = "id") String sort, @RequestParam(required = false, name = "direction", defaultValue = "ASC") String direction) {
         return ResponseEntity.ok(productService.getProduct(getPageable(page, size, sort, direction)));
     }

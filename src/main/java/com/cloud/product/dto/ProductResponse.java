@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +15,6 @@ public class ProductResponse {
     private String productName;
     private Double price;
     private List<String> tags;
-    private String productId;
+    private String productCode;
     private Map<String, String> customFields;
 }
