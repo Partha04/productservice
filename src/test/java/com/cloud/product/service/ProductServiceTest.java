@@ -1,8 +1,10 @@
 package com.cloud.product.service;
 
 import com.cloud.product.dto.ProductResponse;
+import com.cloud.product.exception.CustomException;
 import com.cloud.product.model.Product;
 import com.cloud.product.repository.ProductRepository;
+import com.cloud.product.util.ErrorMessages;
 import com.cloud.product.util.MongoContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -31,7 +34,7 @@ class ProductServiceTest extends MongoContainer {
     }
 
     @Nested
-    class createProductTests {
+    class CreateProductTests {
         @Test
         void shouldSaveOneNewProductToDatabase() {
             ProductResponse productResponse = productService.saveNewProduct(PRODUCT_REQUEST);
@@ -62,7 +65,7 @@ class ProductServiceTest extends MongoContainer {
     }
 
     @Nested
-    class getProducts {
+    class GetProductsTest {
         @BeforeEach
         void setUp() {
             productRepository.save(PRODUCT);
@@ -127,4 +130,41 @@ class ProductServiceTest extends MongoContainer {
     }
 
 
+    @Nested
+    class UpdateProductTests {
+
+        Product savedProduct;
+        Product savedProduct1;
+
+        @BeforeEach
+        void setUp() {
+            productRepository.deleteAll();
+            savedProduct = productRepository.save(PRODUCT);
+            savedProduct1 = productRepository.save(PRODUCT1);
+        }
+
+        @Test
+        void shouldUpdateTheProductWithGivenProductRequest() {
+            String productId = savedProduct.getId();
+            PRODUCT_RESPONSE1.setId(productId);
+            ProductResponse productResponse = productService.updateProduct(productId, PRODUCT_REQUEST1);
+            assertEquals(PRODUCT_RESPONSE1, productResponse);
+        }
+
+        @Test
+        void shouldUpdateAnotherProductWithGivenProductRequest() {
+            String productId = savedProduct1.getId();
+            PRODUCT_RESPONSE.setId(productId);
+            ProductResponse productResponse = productService.updateProduct(productId, PRODUCT_REQUEST);
+            assertEquals(PRODUCT_RESPONSE, productResponse);
+        }
+
+        @Test
+        void shouldGiveErrorWhenGivenProductIdIsNotFound() {
+            PRODUCT_RESPONSE.setId(PRODUCT_ID);
+            CustomException customException = assertThrows(CustomException.class, () -> productService.updateProduct(PRODUCT_ID, PRODUCT_REQUEST));
+            assertEquals(HttpStatus.NOT_FOUND, customException.getStatus());
+            assertEquals(ErrorMessages.PRODUCT_NOT_FOUND_FOR_GIVEN_ID, customException.getMessage());
+        }
+    }
 }

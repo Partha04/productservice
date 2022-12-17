@@ -26,9 +26,10 @@ public class ProductController {
     ResponseEntity<ProductResponse> saveNewProduct(@RequestBody @Valid ProductRequest productRequest) {
         return new ResponseEntity<>(productService.saveNewProduct(productRequest), HttpStatus.CREATED);
     }
+
     @PutMapping(path = "/update/{id}")
     ResponseEntity<ProductResponse> updateProduct(@PathVariable(name = "id") String id, @RequestBody @Valid ProductRequest productRequest) {
-        return new ResponseEntity<>(productService.updateProduct(id,productRequest), HttpStatus.OK);
+        return new ResponseEntity<>(productService.updateProduct(id, productRequest), HttpStatus.OK);
     }
 
     @GetMapping("/all")
@@ -37,8 +38,6 @@ public class ProductController {
         Page<ProductResponse> product = productService.getProduct(pageRequest);
         return ResponseEntity.ok(product);
     }
-
-
 
     private Pageable getPageRequest(int page, int size, String sort, String direction) {
         final String desc = "DESC";

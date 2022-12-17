@@ -21,9 +21,12 @@ public class ProductTestData {
     public static PageRequest FIRST_PAGE_WITH_SIZE_ONE = PageRequest.of(0, 1);
     public static PageRequest FIRST_PAGE_WITH_SIZE_TWO = PageRequest.of(0, 2);
     public static PageRequest SECOND_PAGE_WITH_SIZE_ONE = PageRequest.of(1, 1);
-    public static PageRequest SECOND_PAGE_WITH_SIZE_ONE_SORTED_BY_ = PageRequest.of(1, 1, Sort.by("name").ascending());
+    public static PageRequest SECOND_PAGE_WITH_SIZE_ONE_SORTED_BY_NAME = PageRequest.of(1, 1, Sort.by("name").ascending());
     public static Product PRODUCT = new Product();
     public static Product PRODUCT1 = new Product();
+
+    public static String PRODUCT_ID = "639d77e2b481e31d80294ecc";
+
 
     static {
         String product_name = "product Name";

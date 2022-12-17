@@ -2,12 +2,15 @@ package com.cloud.product.service;
 
 import com.cloud.product.dto.ProductRequest;
 import com.cloud.product.dto.ProductResponse;
+import com.cloud.product.exception.CustomException;
 import com.cloud.product.model.Product;
 import com.cloud.product.repository.ProductRepository;
+import com.cloud.product.util.ErrorMessages;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,6 +31,12 @@ public class ProductService {
     }
 
     public ProductResponse updateProduct(String id, ProductRequest productRequest) {
-        return null;
+        boolean existsById = productRepository.existsById(id);
+        if (!existsById)
+            throw new CustomException(ErrorMessages.PRODUCT_NOT_FOUND_FOR_GIVEN_ID, HttpStatus.NOT_FOUND);
+        Product updatedProduct = mapper.map(productRequest, Product.class);
+        updatedProduct.setId(id);
+        Product product = productRepository.save(updatedProduct);
+        return mapper.map(product, ProductResponse.class);
     }
 }
