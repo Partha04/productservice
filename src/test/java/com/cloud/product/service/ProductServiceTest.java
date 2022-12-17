@@ -167,4 +167,38 @@ class ProductServiceTest extends MongoContainer {
             assertEquals(ErrorMessages.PRODUCT_NOT_FOUND_FOR_GIVEN_ID, customException.getMessage());
         }
     }
+
+    @Nested
+    class DeleteProduct {
+        Product savedProduct;
+        Product savedProduct1;
+
+        @BeforeEach
+        void setUp() {
+            productRepository.deleteAll();
+            savedProduct = productRepository.save(PRODUCT);
+            savedProduct1 = productRepository.save(PRODUCT1);
+        }
+
+        @Test
+        void shouldDeleteTheProductWithGivenId() {
+            String id = savedProduct.getId();
+            productService.deleteProduct(id);
+            assertFalse(productRepository.existsById(id));
+        }
+
+        @Test
+        void shouldDeleteAnotherProductWithGivenId() {
+            String id = savedProduct1.getId();
+            productService.deleteProduct(id);
+            assertFalse(productRepository.existsById(id));
+        }
+
+        @Test
+        void shouldGiveErrorWhenProductWIthGivenIdNotExist() {
+            CustomException customException = assertThrows(CustomException.class, () -> productService.deleteProduct(PRODUCT_ID));
+            assertEquals(HttpStatus.NOT_FOUND, customException.getStatus());
+            assertEquals(ErrorMessages.PRODUCT_NOT_FOUND_FOR_GIVEN_ID, customException.getMessage());
+        }
+    }
 }

@@ -28,7 +28,7 @@ public class ProductController {
     }
 
     @PutMapping(path = "/update/{id}")
-    ResponseEntity<ProductResponse> updateProduct(@PathVariable(name = "id") String id, @RequestBody @Valid ProductRequest productRequest) {
+    ResponseEntity<ProductResponse> updateProduct(@PathVariable(name = "id") String id, @RequestBody ProductRequest productRequest) {
         return new ResponseEntity<>(productService.updateProduct(id, productRequest), HttpStatus.OK);
     }
 
@@ -37,6 +37,11 @@ public class ProductController {
         Pageable pageRequest = getPageRequest(page, size, sort, direction);
         Page<ProductResponse> product = productService.getProduct(pageRequest);
         return ResponseEntity.ok(product);
+    }
+
+    @PostMapping(path = "/delete/{id}")
+    void deleteProduct(@PathVariable String id) {
+        productService.deleteProduct(id);
     }
 
     private Pageable getPageRequest(int page, int size, String sort, String direction) {

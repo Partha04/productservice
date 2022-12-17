@@ -251,14 +251,26 @@ class ProductControllerTest {
             requestBuilder.content(objectMapper.writeValueAsString(PRODUCT_REQUEST));
             when(productService.updateProduct(anyString(), any(ProductRequest.class))).thenReturn(PRODUCT_RESPONSE);
             ResultActions resultActions = mockMvc.perform(requestBuilder);
-
-            ArgumentCaptor<ProductRequest> productRequestArgumentCaptor = ArgumentCaptor.forClass(ProductRequest.class);
-            ArgumentCaptor<String> idArgumentCaptor = ArgumentCaptor.forClass(String.class);
-
             resultActions.andExpect(status().isOk());
             resultActions.andExpect(content().string(objectMapper.writeValueAsString(PRODUCT_RESPONSE)));
         }
 
+    }
 
+    @Nested
+    class DeleteProductTests {
+        @Test
+        void shouldGiveStatusOkWhenProductIsDeletedSuccessfully() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/delete/{id}", PRODUCT_ID);
+            ResultActions actions = mockMvc.perform(requestBuilder);
+            actions.andExpect(status().isOk());
+        }
+
+        @Test
+        void shouldInvokeProductServiceDeleteMethod() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/delete/{id}", PRODUCT_ID);
+            mockMvc.perform(requestBuilder);
+            verify(productService, times(1)).deleteProduct(PRODUCT_ID);
+        }
     }
 }
