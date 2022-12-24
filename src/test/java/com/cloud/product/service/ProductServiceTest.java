@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import java.util.List;
 
 import static com.cloud.product.testData.ProductTestData.*;
+import static com.cloud.product.util.ErrorMessages.PRODUCT_NOT_FOUND_FOR_GIVEN_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -229,6 +230,13 @@ class ProductServiceTest extends MongoContainer {
         void shouldGiveAnotherProductByID() {
             ProductResponse productResponse = productService.getProductByID(productId1);
             assertEquals(PRODUCT_RESPONSE1, productResponse);
+        }
+
+        @Test
+        void shouldGiveExceptionIfTheProductIsNotFoundWithGivenID() {
+            CustomException customException = assertThrows(CustomException.class, () -> productService.getProductByID("productid"));
+            assertEquals(PRODUCT_NOT_FOUND_FOR_GIVEN_ID, customException.getMessage());
+            assertEquals(HttpStatus.NOT_FOUND, customException.getStatus());
         }
     }
 }
