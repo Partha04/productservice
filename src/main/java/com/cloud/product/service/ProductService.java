@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 import static com.cloud.product.util.ErrorMessages.PRODUCT_NOT_FOUND_FOR_GIVEN_ID;
 
 @Service
@@ -33,8 +35,7 @@ public class ProductService {
 
     public ProductResponse updateProduct(String id, ProductRequest productRequest) {
         boolean existsById = productRepository.existsById(id);
-        if (!existsById)
-            throw new CustomException(PRODUCT_NOT_FOUND_FOR_GIVEN_ID, HttpStatus.NOT_FOUND);
+        if (!existsById) throw new CustomException(PRODUCT_NOT_FOUND_FOR_GIVEN_ID, HttpStatus.NOT_FOUND);
         Product updatedProduct = mapper.map(productRequest, Product.class);
         updatedProduct.setId(id);
         Product product = productRepository.save(updatedProduct);
@@ -42,9 +43,13 @@ public class ProductService {
     }
 
     public void deleteProduct(String id) {
-        if (productRepository.existsById(id))
-            productRepository.deleteById(id);
-        else
-            throw new CustomException(PRODUCT_NOT_FOUND_FOR_GIVEN_ID, HttpStatus.NOT_FOUND);
+        if (productRepository.existsById(id)) productRepository.deleteById(id);
+        else throw new CustomException(PRODUCT_NOT_FOUND_FOR_GIVEN_ID, HttpStatus.NOT_FOUND);
+    }
+
+    public ProductResponse getProductByID(String productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isEmpty()) throw new CustomException(PRODUCT_NOT_FOUND_FOR_GIVEN_ID, HttpStatus.NOT_FOUND);
+        return mapper.map(optionalProduct.get(), ProductResponse.class);
     }
 }

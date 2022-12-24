@@ -201,4 +201,34 @@ class ProductServiceTest extends MongoContainer {
             assertEquals(ErrorMessages.PRODUCT_NOT_FOUND_FOR_GIVEN_ID, customException.getMessage());
         }
     }
+
+    @Nested
+    class GetProductByIdTests {
+        String productId;
+        String productId1;
+
+        @BeforeEach
+        void setUp() {
+            Product product = productRepository.save(PRODUCT);
+            Product product1 = productRepository.save(PRODUCT1);
+            productId = product.getId();
+            productId1 = product1.getId();
+            PRODUCT_RESPONSE.setId(productId);
+            PRODUCT_RESPONSE1.setId(productId1);
+
+        }
+
+        @Test
+        void shouldGiveTheSavedProductByID() {
+            ProductResponse productResponse = productService.getProductByID(productId);
+            assertEquals(PRODUCT_RESPONSE, productResponse);
+
+        }
+
+        @Test
+        void shouldGiveAnotherProductByID() {
+            ProductResponse productResponse = productService.getProductByID(productId1);
+            assertEquals(PRODUCT_RESPONSE1, productResponse);
+        }
+    }
 }

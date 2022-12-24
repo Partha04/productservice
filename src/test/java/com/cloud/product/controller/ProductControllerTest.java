@@ -73,8 +73,7 @@ class ProductControllerTest {
             productRequest.setProductCode("12");
             productRequest.setPrice(12.1);
             ResultActions resultActions = makeProductPostRequest(productRequest);
-            resultActions.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("message").value("product name can not be empty"));
+            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("message").value("product name can not be empty"));
         }
 
         @Test
@@ -83,8 +82,7 @@ class ProductControllerTest {
             productRequest.setProductName("product name");
             productRequest.setProductCode("12");
             ResultActions resultActions = makeProductPostRequest(productRequest);
-            resultActions.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("message").value("product price can not be empty"));
+            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("message").value("product price can not be empty"));
         }
 
         @Test
@@ -93,24 +91,21 @@ class ProductControllerTest {
             productRequest.setProductName("product name");
             productRequest.setPrice(12.1);
             ResultActions resultActions = makeProductPostRequest(productRequest);
-            resultActions.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("message").value("product code can not be empty"));
+            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("message").value("product code can not be empty"));
         }
 
         @Test
         void shouldGiveTheSavedProductWhenProductIsSavedSuccessFully() throws Exception {
             when(productService.saveNewProduct(PRODUCT_REQUEST)).thenReturn(PRODUCT_RESPONSE);
             ResultActions resultActions = makeProductPostRequest(PRODUCT_REQUEST);
-            resultActions.andExpect(status().isCreated())
-                    .andExpect(content().string(objectMapper.writeValueAsString(PRODUCT_RESPONSE)));
+            resultActions.andExpect(status().isCreated()).andExpect(content().string(objectMapper.writeValueAsString(PRODUCT_RESPONSE)));
         }
 
         @Test
         void shouldGiveTheSavedProductWhenAnotherProductIsSavedSuccessFully() throws Exception {
             when(productService.saveNewProduct(PRODUCT_REQUEST1)).thenReturn(PRODUCT_RESPONSE1);
             ResultActions resultActions = makeProductPostRequest(PRODUCT_REQUEST1);
-            resultActions.andExpect(status().isCreated())
-                    .andExpect(content().string(objectMapper.writeValueAsString(PRODUCT_RESPONSE1)));
+            resultActions.andExpect(status().isCreated()).andExpect(content().string(objectMapper.writeValueAsString(PRODUCT_RESPONSE1)));
         }
     }
 
@@ -192,8 +187,7 @@ class ProductControllerTest {
 
             ResultActions actions = mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
-            actions.andExpect(status().isOk())
-                    .andExpect(content().string(objectMapper.writeValueAsString(productResponses)));
+            actions.andExpect(status().isOk()).andExpect(content().string(objectMapper.writeValueAsString(productResponses)));
         }
 
         @Test
@@ -206,19 +200,19 @@ class ProductControllerTest {
 
             ResultActions actions = mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
-            actions.andExpect(status().isOk())
-                    .andExpect(content().string(objectMapper.writeValueAsString(productResponses)))
-            ;
+            actions.andExpect(status().isOk()).andExpect(content().string(objectMapper.writeValueAsString(productResponses)));
         }
     }
 
     @Nested
     class UpdateProduct {
+        String urlTemplate = "/update/{id}";
+
         @Test
         void shouldGiveStatusOkWhenProductWithGivenIDIsUpdated() throws Exception {
             String productId = "639d77e2b481e31d80294ecc";
             when(productService.updateProduct(anyString(), any(ProductRequest.class))).thenReturn(new ProductResponse());
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/update/{id}", productId);
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(urlTemplate, productId);
             requestBuilder.contentType(MediaType.APPLICATION_JSON);
             requestBuilder.content(objectMapper.writeValueAsString(PRODUCT_REQUEST));
             ResultActions resultActions = mockMvc.perform(requestBuilder);
@@ -228,7 +222,7 @@ class ProductControllerTest {
         @Test
         void shouldInvokeProductServiceUpdateProductMethodWithGivenParams() throws Exception {
             String productId = "639d77e2b481e31d80294ecc";
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/update/{id}", productId);
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(urlTemplate, productId);
             requestBuilder.contentType(MediaType.APPLICATION_JSON);
             requestBuilder.content(objectMapper.writeValueAsString(PRODUCT_REQUEST));
             when(productService.updateProduct(anyString(), any(ProductRequest.class))).thenReturn(PRODUCT_RESPONSE);
@@ -246,7 +240,7 @@ class ProductControllerTest {
         @Test
         void shouldGiveUpdatedProductRequest() throws Exception {
             String productId = "639d77e2b481e31d80294ecc";
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/update/{id}", productId);
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(urlTemplate, productId);
             requestBuilder.contentType(MediaType.APPLICATION_JSON);
             requestBuilder.content(objectMapper.writeValueAsString(PRODUCT_REQUEST));
             when(productService.updateProduct(anyString(), any(ProductRequest.class))).thenReturn(PRODUCT_RESPONSE);
@@ -259,18 +253,42 @@ class ProductControllerTest {
 
     @Nested
     class DeleteProductTests {
+        String urlTemplate = "/delete/{id}";
+
         @Test
         void shouldGiveStatusOkWhenProductIsDeletedSuccessfully() throws Exception {
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/delete/{id}", PRODUCT_ID);
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete(urlTemplate, PRODUCT_ID);
             ResultActions actions = mockMvc.perform(requestBuilder);
             actions.andExpect(status().isOk());
         }
 
         @Test
         void shouldInvokeProductServiceDeleteMethod() throws Exception {
-            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/delete/{id}", PRODUCT_ID);
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete(urlTemplate, PRODUCT_ID);
             mockMvc.perform(requestBuilder);
             verify(productService, times(1)).deleteProduct(PRODUCT_ID);
+        }
+    }
+
+    @Nested
+    class GetProductsById {
+        String urlTemplate = "/{id}";
+
+        @Test
+        void shouldGiveSuccessWhenGetByProductIdIsSuccessful() throws Exception {
+            String productId = "id";
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate, productId);
+            ResultActions resultActions = mockMvc.perform(requestBuilder);
+            resultActions.andExpect(status().isOk());
+        }
+
+        @Test
+        void shouldInvokeProductServiceWhenGetByProductIdIsSuccessful() throws Exception {
+            String productId = "id";
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(urlTemplate, productId);
+            when(productService.getProductByID(productId)).thenReturn(new ProductResponse());
+            mockMvc.perform(requestBuilder);
+            verify(productService).getProductByID(productId);
         }
     }
 }
